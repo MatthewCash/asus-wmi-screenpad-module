@@ -1,0 +1,15 @@
+[
+    {
+        "arguments": [
+            "-include",
+            "-include",
+            " ",
+            "-D__KERNEL__",
+            "-DKBUILD_MODNAME=\"asus_wmi_screenpad\"",
+            "-DMODULE"
+        ],
+        "directory": " ",
+        "file": "/" ,
+        "output": " "
+    }
+]
