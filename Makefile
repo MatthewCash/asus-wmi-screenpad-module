@@ -8,7 +8,7 @@ KERNEL := $(KERNEL_MODULES)/build
 
 .PHONY: all
 all:
-	ln -s $(CWD)/Makefile $(SRC_DIR)
+	ln -sf $(CWD)/Makefile $(SRC_DIR)
 	make -C $(KERNEL) M=$(OBJ_DIR) src=$(SRC_DIR) modules
 	rm $(SRC_DIR)Makefile
 
