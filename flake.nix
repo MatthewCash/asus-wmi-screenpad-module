@@ -10,11 +10,11 @@
     flake-utils.lib.eachDefaultSystem (system:
         let
             pkgs = nixpkgs.legacyPackages.${system};
-            linux = pkgs.linuxPackages_latest.kernel.dev;
+            linux = pkgs.linuxPackages_latest.kernel;
         in {
             devShell = pkgs.mkShell {
-                name = "asus-screenpad";
-                packages = with pkgs; [ pahole ] ++ [ linux ];
+                name = "asus-wmi-screenpad";
+                packages = [ linux ];
                 KERNEL_MODULES = "${linux.dev}/lib/modules/${linux.modDirVersion}";
                 CPATH = builtins.concatStringsSep ":" [
                     "${linux.dev}/lib/modules/${linux.modDirVersion}/source/arch/x86/include/generated"
@@ -25,6 +25,7 @@
                     "${linux.dev}/lib/modules/${linux.modDirVersion}/source/include/generated/uapi"
                 ];
             };
+
             defaultPackage = pkgs.lib.makeOverridable (kernel: pkgs.stdenv.mkDerivation {
                 name = "asus-wmi-screenpad";
                 version = "0.1.0";
