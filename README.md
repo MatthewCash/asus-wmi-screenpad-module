@@ -17,3 +17,19 @@ asus-wmi-screenpad = inputs.asus-wmi-screenpad.defaultPackage.${system}.override
 
 3. Add the new package to your `boot.extraModulePackages`
 4. Optionally enable it by default by adding `asus-wmi-screenpad` to `boot.kernelModules`
+
+## Building manually (with Nix)
+
+To enter a shell with the dependencies to develop run
+
+```nix
+nix develop --override-input nixpkgs nixpkgs
+```
+
+`-ovveride-input` is used to make sure that `nixpkgs` is matched with your system's `nixpkgs`
+
+Use the build script to provide a custom kernel
+
+```nix
+nix run --override-input nixpkgs nixpkgs path:.#buildWithKernel linuxPackages_latest
+````

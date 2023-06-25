@@ -44,6 +44,19 @@
                     cp obj/* $out/lib/modules/${kernel.modDirVersion}/kernel/drivers/platform
                 '';
             }) linux;
+
+            # Build with local kernel
+            packages.buildWithKernel = pkgs.writeShellScriptBin "buildWithKernel" /* sh */ ''
+                kernelPackages="$1"
+
+                if [[ -z "$kernelPackages" ]]; then
+                    echo >&2 "Kernel Packages argument not supplied!"
+                    exit 1
+                fi
+
+                # There is probably a better way to do this, but it works :)
+                exec nix build --impure --expr "(builtins.getFlake (toString ./.)).defaultPackage.\''${builtins.currentSystem}.override (builtins.getFlake \"${nixpkgs}\").legacyPackages.\''${builtins.currentSystem}."$kernelPackages".kernel"
+            '';
         }
     );
 }
