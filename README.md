@@ -6,13 +6,13 @@ This module was created using the [asus-wmi-screenpad](https://github.com/Plippo
 
 ## Installation
 
-This is meant to be used with NixOS
+This is meant to be used with NixOS but should also work with DKMS
 
 1. Add this repo to your flake's inputs
 2. Override the kernel parameter with something liike
 
 ```nix
-asus-wmi-screenpad = inputs.asus-wmi-screenpad.defaultPackage.${system}.override kernelPackages.kernel.dev;
+asus-wmi-screenpad = inputs.asus-wmi-screenpad.defaultPackage.${system}.override kernelPackages.kernel;
 ```
 
 3. Add the new package to your `boot.extraModulePackages`
