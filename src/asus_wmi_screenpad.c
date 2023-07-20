@@ -150,7 +150,7 @@ static int configure_setup(struct asus_wmi_screenpad *asus_wmi_screenpad)
     asus_wmi_screenpad->screenpad_led.brightness_get = screenpad_led_get;
     asus_wmi_screenpad->screenpad_led.max_brightness = 0xff;
 
-    led_classdev_register(&asus_wmi_screenpad->platform_device->dev, &asus_wmi_screenpad->screenpad_led);
+    devm_led_classdev_register(&asus_wmi_screenpad->platform_device->dev, &asus_wmi_screenpad->screenpad_led);
 
     return 0;
 }
@@ -171,7 +171,7 @@ static int asus_wmi_screenpad_probe(struct platform_device *pdev)
     struct asus_wmi_screenpad *asus_wmi_screenpad;
     char *wmi_uid;
 
-    asus_wmi_screenpad = kzalloc(sizeof(struct asus_wmi_screenpad), GFP_KERNEL);
+    asus_wmi_screenpad = devm_kzalloc(&pdev->dev, sizeof(struct asus_wmi_screenpad), GFP_KERNEL);
     if (!asus_wmi_screenpad) return -ENOMEM;
 
     wmi_uid = wmi_get_acpi_device_uid(ASUS_WMI_MGMT_GUID);
@@ -210,11 +210,6 @@ static int __init asus_wmi_screenpad_init(void)
 
 static void __exit asus_wmi_screenpad_exit(void)
 {
-    struct asus_wmi_screenpad *asus_wmi_screenpad =
-        platform_get_drvdata(asus_wmi_screenpad_platform_device);
-
-    led_classdev_unregister(&asus_wmi_screenpad->screenpad_led);
-
     platform_device_unregister(asus_wmi_screenpad_platform_device);
     platform_driver_unregister(&asus_wmi_screenpad_platform_driver);
 
