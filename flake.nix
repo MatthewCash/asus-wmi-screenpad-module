@@ -14,7 +14,7 @@
         in {
             devShell = pkgs.mkShell {
                 name = "asus-wmi-screenpad";
-                packages = [ linux ];
+                packages = with pkgs; [ pahole ] ++ [ linux ];
                 KERNEL_MODULES = "${linux.dev}/lib/modules/${linux.modDirVersion}";
                 CPATH = builtins.concatStringsSep ":" [
                     "${linux.dev}/lib/modules/${linux.modDirVersion}/source/arch/x86/include/generated"
