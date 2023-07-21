@@ -170,12 +170,15 @@ static int asus_wmi_screenpad_probe(struct platform_device *pdev)
 {
     struct asus_wmi_screenpad *asus_wmi_screenpad;
     char *wmi_uid;
+    bool is_screenpad_present;
 
     asus_wmi_screenpad = devm_kzalloc(&pdev->dev, sizeof(struct asus_wmi_screenpad), GFP_KERNEL);
     if (!asus_wmi_screenpad) return -ENOMEM;
 
     wmi_uid = wmi_get_acpi_device_uid(ASUS_WMI_MGMT_GUID);
     if (!wmi_uid) return -ENODEV;
+    is_screenpad_present = asus_wmi_dev_is_present(asus_wmi_screenpad, ASUS_WMI_DEVID_SCREENPAD);
+    if (!is_screenpad_present) return -ENODEV;
 
     if (!strcmp(wmi_uid, ASUS_ACPI_UID_ASUSWMI)) {
         dev_info(&pdev->dev, "Detected ASUSWMI, use DCTS\n");
