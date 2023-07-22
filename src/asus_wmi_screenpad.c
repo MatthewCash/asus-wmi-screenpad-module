@@ -76,6 +76,14 @@ static int asus_wmi_get_devstate(struct asus_wmi_screenpad *asus_wmi_screenpad, 
     return asus_wmi_evaluate_method(asus_wmi_screenpad->dsts_id, dev_id, 0, 0, retval);
 }
 
+static bool asus_wmi_dev_is_present(struct asus_wmi_screenpad *asus_wmi_screenpad, u32 dev_id)
+{
+	u32 retval;
+	int status = asus_wmi_get_devstate(asus_wmi_screenpad, dev_id, &retval);
+
+	return status == 0 && (retval & ASUS_WMI_DSTS_PRESENCE_BIT);
+}
+
 static int asus_wmi_set_devstate(u32 dev_id, u32 ctrl_param, u32 *retval)
 {
     return asus_wmi_evaluate_method(ASUS_WMI_METHODID_DEVS, dev_id, ctrl_param, 0, retval);
