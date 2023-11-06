@@ -4,9 +4,7 @@ A kernel module adding an LED class device for the screenpad on some ASUS Zenboo
 
 This module was created using the [asus-wmi-screenpad](https://github.com/Plippo/asus-wmi-screenpad) patches, but distributed as a separate module to make installation easier and prevent breakages
 
-## Installation
-
-This is meant to be used with NixOS but should also work with DKMS
+## NixOS Installation
 
 1. Add this repo to your flake's inputs
 2. Override the kernel parameter with something liike
@@ -17,6 +15,14 @@ asus-wmi-screenpad = inputs.asus-wmi-screenpad.defaultPackage.${system}.override
 
 3. Add the new package to your `boot.extraModulePackages`
 4. Optionally enable it by default by adding `asus-wmi-screenpad` to `boot.kernelModules`
+
+## DKMS Installation (for non-NixOS)
+
+This project is meant to be used with NixOS, but it *should* work with DKMS
+
+1. Add the repo to DKMS with `sudo dkms add .`
+2. Build and install the module with `sudo dkms install asus-wmi-screenpad/0.1`
+3. Load the module with `sudo modprobe asus-wmi-screenpad`
 
 ## Building manually (with Nix)
 
