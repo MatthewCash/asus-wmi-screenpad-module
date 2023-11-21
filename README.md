@@ -7,7 +7,7 @@ This module was created using the [asus-wmi-screenpad](https://github.com/Plippo
 ## NixOS Installation
 
 1. Add this repo to your flake's inputs
-2. Override the kernel parameter with something liike
+2. Override the kernel parameter with something like this
 
 ```nix
 asus-wmi-screenpad = inputs.asus-wmi-screenpad.defaultPackage.${system}.override kernelPackages.kernel;
