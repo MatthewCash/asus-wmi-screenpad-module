@@ -10,6 +10,14 @@ MODULE_DESCRIPTION("ASUS WMI Screenpad Driver");
 MODULE_LICENSE("GPL");
 MODULE_VERSION("1");
 
+static bool enable_led_dev = true;
+static bool enable_bl_dev = false; // Defaults to false because some DEs only expect one backlight dev
+
+module_param(enable_led_dev, bool, 0644);
+MODULE_PARM_DESC(enable_led_dev, "Whether to register an LED class device");
+module_param(enable_bl_dev, bool, 0644);
+MODULE_PARM_DESC(enable_bl_dev, "Whether to register a backlight device");
+
 #define ASUS_WMI_MGMT_GUID "97845ED0-4E6D-11DE-8A39-0800200C9A66"
 #define ASUS_ACPI_UID_ASUSWMI "ASUSWMI"
 #define ASUS_WMI_UNSUPPORTED_METHOD 0xFFFFFFFE
@@ -111,7 +119,7 @@ static int screenpad_read_power(struct asus_wmi_screenpad *asus_wmi_screenpad)
 static int screenpad_set_power(struct asus_wmi_screenpad *asus_wmi_screenpad, bool power)
 {
     int retval = asus_wmi_set_devstate(ASUS_WMI_DEVID_SCREENPAD, power, NULL);
-    if (retval == 0) asus_wmi_screenpad->screenpad_backlight->props.power = power;
+    if (enable_bl_dev && retval == 0) asus_wmi_screenpad->screenpad_backlight->props.power = power;
     return retval;
 }
 
@@ -133,7 +141,7 @@ static int screenpad_read_brightness(struct asus_wmi_screenpad *asus_wmi_screenp
 static int screenpad_set_brightness(struct asus_wmi_screenpad *asus_wmi_screenpad, u32 brightness)
 {
     int retval = asus_wmi_set_devstate(ASUS_WMI_DEVID_SCREENPAD_LIGHT, brightness, NULL);
-    if (retval == 0) asus_wmi_screenpad->screenpad_backlight->props.brightness = brightness;
+    if (enable_bl_dev && retval == 0) asus_wmi_screenpad->screenpad_backlight->props.brightness = brightness;
     return retval;
 }
 
@@ -236,9 +244,38 @@ static const struct backlight_ops screenpad_bl_ops = {
 	.update_status = screenpad_backlight_update,
 };
 
-static int configure_setup(struct asus_wmi_screenpad *asus_wmi_screenpad)
+static int create_led_dev(struct asus_wmi_screenpad *asus_wmi_screenpad)
+{
+    asus_wmi_screenpad->screenpad_led.name = "asus::screenpad";
+    asus_wmi_screenpad->screenpad_led.brightness_set = screenpad_led_set;
+    asus_wmi_screenpad->screenpad_led.brightness_get = screenpad_led_get;
+    asus_wmi_screenpad->screenpad_led.max_brightness = 0xff;
+
+    return devm_led_classdev_register(&asus_wmi_screenpad->platform_device->dev, &asus_wmi_screenpad->screenpad_led);
+}
+
+static int create_bl_dev(struct asus_wmi_screenpad *asus_wmi_screenpad)
 {
     struct backlight_properties props;
+
+    memset(&props, 0, sizeof(struct backlight_properties));
+
+    props.type = BACKLIGHT_PLATFORM;
+    props.max_brightness = 0xff;
+
+    struct backlight_device *bl_dev = devm_backlight_device_register(&asus_wmi_screenpad->platform_device->dev, "screenpad_backlight", &asus_wmi_screenpad->platform_device->dev, asus_wmi_screenpad, &screenpad_bl_ops, &props);
+
+    if (IS_ERR(bl_dev)) {
+        return PTR_ERR(bl_dev);
+    }
+
+    asus_wmi_screenpad->screenpad_backlight = bl_dev;
+
+    return 0;
+}
+
+static int setup_devs(struct asus_wmi_screenpad *asus_wmi_screenpad)
+{
 
     INIT_WORK(&asus_wmi_screenpad->screenpad_power_work, screenpad_power_update);
     INIT_WORK(&asus_wmi_screenpad->screenpad_brightness_work, screenpad_brightness_update);
@@ -246,17 +283,15 @@ static int configure_setup(struct asus_wmi_screenpad *asus_wmi_screenpad)
     asus_wmi_screenpad->power_workqueue = create_singlethread_workqueue("screenpad_power_workqueue");
     asus_wmi_screenpad->brightness_workqueue = create_singlethread_workqueue("screenpad_brightness_workqueue");
 
-    asus_wmi_screenpad->screenpad_led.name = "asus::screenpad";
-    asus_wmi_screenpad->screenpad_led.brightness_set = screenpad_led_set;
-    asus_wmi_screenpad->screenpad_led.brightness_get = screenpad_led_get;
-    asus_wmi_screenpad->screenpad_led.max_brightness = 0xff;
+    if (enable_led_dev) {
+        int res = create_led_dev(asus_wmi_screenpad);
+        if (res != 0) return res;
+    }
 
-    devm_led_classdev_register(&asus_wmi_screenpad->platform_device->dev, &asus_wmi_screenpad->screenpad_led);
-
-    memset(&props, 0, sizeof(struct backlight_properties));
-    props.type = BACKLIGHT_PLATFORM;
-    props.max_brightness = 0xff;
-    asus_wmi_screenpad->screenpad_backlight = devm_backlight_device_register(&asus_wmi_screenpad->platform_device->dev, "screenpad_backlight", &asus_wmi_screenpad->platform_device->dev, asus_wmi_screenpad, &screenpad_bl_ops, &props);
+    if (enable_bl_dev) {
+        int res = create_bl_dev(asus_wmi_screenpad);
+        if (res != 0) return res;
+    }
 
     return 0;
 }
@@ -300,7 +335,7 @@ static int asus_wmi_screenpad_probe(struct platform_device *pdev)
 
     platform_set_drvdata(asus_wmi_screenpad->platform_device, asus_wmi_screenpad);
 
-    configure_setup(asus_wmi_screenpad);
+    setup_devs(asus_wmi_screenpad);
 
     return 0;
 }
