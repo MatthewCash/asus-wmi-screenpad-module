@@ -39,3 +39,10 @@ Use the build script to provide a custom kernel
 ```nix
 nix run --override-input nixpkgs nixpkgs path:.#buildWithKernel linuxPackages_latest
 ````
+
+## Configuration
+
+There are two command-line module parameters
+
+- `enable_led_dev` (default `=true`) Registers an LED device
+- `enable_bl_dev` (default `=false`) Registers a backlight device
