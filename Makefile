@@ -5,7 +5,6 @@ SRC_DIR := $(CWD)/src/
 OBJ_DIR := $(CWD)/obj/
 KERNEL := $(KERNEL_MODULES)/build
 
-
 .PHONY: all
 all:
 	ln -sf $(CWD)/Makefile $(SRC_DIR)
