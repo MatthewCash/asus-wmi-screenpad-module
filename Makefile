@@ -17,8 +17,11 @@ all: $(SRCS_IN_OBJ)
 	rm $(SRCS_IN_OBJ)
 
 # Copy source files to output dir
-$(SRCS_IN_OBJ):
+$(SRCS_IN_OBJ): $(OBJ_DIR)
 	ln -s $(SRC_FILES) $@
+
+$(OBJ_DIR):
+	mkdir -p $@
 
 .PHONY: clean
 clean:
