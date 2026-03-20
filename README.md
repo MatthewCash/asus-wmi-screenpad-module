@@ -36,6 +36,8 @@ nix develop --override-input nixpkgs nixpkgs
 
 Use the build script to provide a custom kernel
 
+*Note: you likely need to update this flake's nixpkgs input otherwise compilation will fail!*
+
 ```nix
 nix run --override-input nixpkgs nixpkgs path:.#buildWithKernel linuxPackages_latest
 ````
