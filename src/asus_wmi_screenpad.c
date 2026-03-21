@@ -110,7 +110,7 @@ static int asus_wmi_set_devstate(u32 dev_id, u32 ctrl_param, u32 *retval)
 static int screenpad_read_power(struct asus_wmi_screenpad *asus_wmi_screenpad)
 {
     u32 power, retval;
-    retval = asus_wmi_get_devstate(asus_wmi_screenpad, ASUS_WMI_DEVID_SCREENPAD_LIGHT, &power);
+    retval = asus_wmi_get_devstate(asus_wmi_screenpad, ASUS_WMI_DEVID_SCREENPAD, &power);
 
     if (retval < 0) return retval;
     return power;
@@ -155,7 +155,7 @@ static int screenpad_led_read(struct asus_wmi_screenpad *asus_wmi_screenpad)
 {
     u32 power = screenpad_read_power(asus_wmi_screenpad);
     if (power < 0) return power;
-    if (power & 28) {
+    if (power & 0xa1) {
         u32 brightness = screenpad_read_brightness(asus_wmi_screenpad);
         return brightness;
     } else {
